@@ -9,16 +9,18 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - name: Sync Github Repos To Gitee  # 名字随便起
-      uses: Yikun/hub-mirror-action@v1.1  # 使用Yikun/hub-mirror-action
-      with:
-        src: github/Hengyong888  # 源端账户名(github)
-        dst: coding/hengyong888  # 目的端账户名(coding)
-        dst_key: ${{ secrets.CODING_RSA_PRIVATE_KEY }}  # SSH密钥对中的私钥
-        dst_token:  ${{ secrets.CODING_TOKEN }}  # Gitee账户的私人令牌
-        account_type: user  # 账户类型
-        clone_style: "https"  # 使用https方式进行clone，也可以使用ssh
-        debug: true  # 启用后会显示所有执行命令
-        force_update: true  # 启用后，强制同步，即强制覆盖目的端仓库
-        static_list: "site.config.v1"  # 静态同步列表，在此填写需要同步的仓库名称，可填写多个
-        timeout: '600s'  # git超时设置，超时后会自动重试git操作
+    - name: Push to Coding
+        run: |
+          remote_repo="https://${CODING_USERNAME}:${CODING_PASSWORD}@e.coding.net/${CODING_REPOSITORY}.git"
+
+          git remote add coding "${remote_repo}"
+          git show-ref # useful for debugging
+          git branch --verbose
+
+          # publish all
+          git push --all --force coding
+          git push --tags --force coding
+        env:
+          CODING_REPOSITORY: hengyong888/cg/site.config.v1
+          CODING_USERNAME: ${{ secrets.CODING_USERNAME }}
+          CODING_PASSWORD: ${{ secrets.CODING_PASSWORD }}
